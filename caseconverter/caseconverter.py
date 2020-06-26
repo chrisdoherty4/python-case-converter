@@ -162,7 +162,7 @@ def cobol_case(s, delims=" _-", strip_punctuation=True):
 
     s = _mutate_tokens(
         s,
-        "(?<=[{}])([a-zA-Z]+)|(?<=[a-z])([A-Z][a-zA-Z]+)".format(re.escape(delims)),
+        "(?<=[{}]|[A-Z])([a-zA-Z]+)".format(re.escape(delims)),
         mutate,
     )
     

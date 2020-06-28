@@ -28,13 +28,13 @@ class StringBuffer(StringIO):
         super(StringBuffer, self).write(s)
 
 
-DELIMETERS = " -_"
+DELIMITERS = " -_"
 
 
-def stripable_punctuation(delimeters):
-    """Construct a string of stripable punctuation based on delimeters.
+def stripable_punctuation(delimiters):
+    """Construct a string of stripable punctuation based on delimiters.
     """
-    return "".join([c for c in string.punctuation if c not in delimeters])
+    return "".join([c for c in string.punctuation if c not in delimiters])
 
 
 class BoundaryHandler(object):
@@ -70,7 +70,7 @@ class BoundaryHandler(object):
 
 
 class CaseConverter(object):
-    def __init__(self, s, delimeters=DELIMETERS, strip_punctuation=True):
+    def __init__(self, s, delimiters=DELIMITERS, strip_punctuation=True):
         """Initialize a case conversion.
 
         On initialization, punctuation can be optionally stripped. If punctuation
@@ -90,20 +90,20 @@ class CaseConverter(object):
 
         :param s: The raw string to convert.
         :type s: str
-        :param delimeters: A set of delimeters used to identify boundaries.
-            Defaults to DELIMETERS
-        :type delimeters: str
+        :param delimiters: A set of delimiters used to identify boundaries.
+            Defaults to DELIMITERS
+        :type delimiters: str
         """
-        self._delimeters = delimeters
+        self._delimiters = delimiters
 
-        s = s.strip(delimeters)
+        s = s.strip(delimiters)
 
         if strip_punctuation:
-            punctuation = stripable_punctuation(delimeters)
+            punctuation = stripable_punctuation(delimiters)
             s = re.sub("[{}]+".format(re.escape(punctuation)), "", s)
 
-        # Change recurring delimeters into single delimeters.
-        s = re.sub("[{}]+".format(re.escape(delimeters)), delimeters[0], s)
+        # Change recurring delimiters into single delimiters.
+        s = re.sub("[{}]+".format(re.escape(delimiters)), delimiters[0], s)
 
         self._raw_input = s
         self._input_buffer = StringBuffer(self.prepare_string(s))
@@ -130,12 +130,12 @@ class CaseConverter(object):
         logger.warn("No boundaries defined")
         return
 
-    def delimeters(self):
-        """Retrieve the delimeters.
+    def delimiters(self):
+        """Retrieve the delimiters.
 
         :rtype: str
         """
-        return self._delimeters
+        return self._delimiters
 
     def raw(self):
         """Retrieve the raw string to be converted.
@@ -214,12 +214,12 @@ class CaseConverter(object):
 
 
 class OnDelimeterUppercaseNext(BoundaryHandler):
-    def __init__(self, delimeters, join_char=""):
-        self._delimeters = delimeters
+    def __init__(self, delimiters, join_char=""):
+        self._delimiters = delimiters
         self._join_char = join_char
 
     def is_boundary(self, pc, c):
-        return c in self._delimeters
+        return c in self._delimiters
 
     def handle(self, pc, cc, input_buffer, output_buffer):
         output_buffer.write(self._join_char)
@@ -227,12 +227,12 @@ class OnDelimeterUppercaseNext(BoundaryHandler):
 
 
 class OnDelimeterLowercaseNext(BoundaryHandler):
-    def __init__(self, delimeters, join_char=""):
-        self._delimeters = delimeters
+    def __init__(self, delimiters, join_char=""):
+        self._delimiters = delimiters
         self._join_char = join_char
 
     def is_boundary(self, pc, c):
-        return c in self._delimeters
+        return c in self._delimiters
 
     def handle(self, pc, cc, input_buffer, output_buffer):
         output_buffer.write(self._join_char)
@@ -265,7 +265,7 @@ class OnUpperPrecededByLowerAppendLower(BoundaryHandler):
 
 class Camel(CaseConverter):
     def define_boundaries(self):
-        self.add_boundary_handler(OnDelimeterUppercaseNext(self.delimeters()))
+        self.add_boundary_handler(OnDelimeterUppercaseNext(self.delimiters()))
         self.add_boundary_handler(OnUpperPrecededByLowerAppendUpper())
 
     def prepare_string(self, s):
@@ -289,7 +289,7 @@ class Snake(CaseConverter):
 
     def define_boundaries(self):
         self.add_boundary_handler(
-            OnDelimeterLowercaseNext(self.delimeters(), self.JOIN_CHAR)
+            OnDelimeterLowercaseNext(self.delimiters(), self.JOIN_CHAR)
         )
         self.add_boundary_handler(OnUpperPrecededByLowerAppendLower(self.JOIN_CHAR))
 
@@ -319,14 +319,14 @@ class Cobol(CaseConverter):
 
     def define_boundaries(self):
         self.add_boundary_handler(
-            OnDelimeterUppercaseNext(self.delimeters(), self.JOIN_CHAR)
+            OnDelimeterUppercaseNext(self.delimiters(), self.JOIN_CHAR)
         )
         self.add_boundary_handler(OnUpperPrecededByLowerAppendUpper(self.JOIN_CHAR))
 
     def convert(self):
         if self.raw().isupper():
             return re.sub(
-                "[{}]+".format(re.escape(self.delimeters())),
+                "[{}]+".format(re.escape(self.delimiters())),
                 self.JOIN_CHAR,
                 self.raw(),
             )
@@ -342,7 +342,7 @@ class Macro(Cobol):
     JOIN_CHAR = "_"
 
 
-def camel_case(s, delims=DELIMETERS, strip_punctuation=True):
+def camel_case(s, delims=DELIMITERS, strip_punctuation=True):
     """Convert a string to camel case.
 
     Example
@@ -350,10 +350,10 @@ def camel_case(s, delims=DELIMETERS, strip_punctuation=True):
       Hello World => helloWorld
 
     """
-    return Camel(s, delimeters=delims, strip_punctuation=strip_punctuation).convert()
+    return Camel(s, delimiters=delims, strip_punctuation=strip_punctuation).convert()
 
 
-def cobol_case(s, delims=DELIMETERS, strip_punctuation=True):
+def cobol_case(s, delims=DELIMITERS, strip_punctuation=True):
     """Convert a string to cobol case
 
     Example
@@ -361,10 +361,10 @@ def cobol_case(s, delims=DELIMETERS, strip_punctuation=True):
       Hello World => HELLO-WORLD
 
     """
-    return Cobol(s, delimeters=delims, strip_punctuation=strip_punctuation).convert()
+    return Cobol(s, delimiters=delims, strip_punctuation=strip_punctuation).convert()
 
 
-def macro_case(s, delims=DELIMETERS, strip_punctuation=True):
+def macro_case(s, delims=DELIMITERS, strip_punctuation=True):
     """Convert a string to macro case
 
     Example
@@ -372,10 +372,10 @@ def macro_case(s, delims=DELIMETERS, strip_punctuation=True):
         Hello World => HELLO_WORLD
 
     """
-    return Macro(s, delimeters=delims, strip_punctuation=strip_punctuation).convert()
+    return Macro(s, delimiters=delims, strip_punctuation=strip_punctuation).convert()
 
 
-def snake_case(s, delims=DELIMETERS, strip_punctuation=True):
+def snake_case(s, delims=DELIMITERS, strip_punctuation=True):
     """Convert a string to snake case.
 
     Example
@@ -383,10 +383,10 @@ def snake_case(s, delims=DELIMETERS, strip_punctuation=True):
         Hello World => hello_world
 
     """
-    return Snake(s, delimeters=delims, strip_punctuation=strip_punctuation).convert()
+    return Snake(s, delimiters=delims, strip_punctuation=strip_punctuation).convert()
 
 
-def pascal_case(s, delims=DELIMETERS, strip_punctuation=True):
+def pascal_case(s, delims=DELIMITERS, strip_punctuation=True):
     """Convert a string to pascal case
 
     Example
@@ -395,10 +395,10 @@ def pascal_case(s, delims=DELIMETERS, strip_punctuation=True):
         hello world => HelloWorld
 
     """
-    return Pascal(s, delimeters=delims, strip_punctuation=strip_punctuation).convert()
+    return Pascal(s, delimiters=delims, strip_punctuation=strip_punctuation).convert()
 
 
-def flat_case(s, delims=DELIMETERS, strip_punctuation=True):
+def flat_case(s, delims=DELIMITERS, strip_punctuation=True):
     """Convert a string to flat case
 
     Example
@@ -406,10 +406,10 @@ def flat_case(s, delims=DELIMETERS, strip_punctuation=True):
         Hello World => helloworld
 
     """
-    return Flat(s, delimeters=delims, strip_punctuation=strip_punctuation).convert()
+    return Flat(s, delimiters=delims, strip_punctuation=strip_punctuation).convert()
 
 
-def kebab_case(s, delims=DELIMETERS, strip_punctuation=True):
+def kebab_case(s, delims=DELIMITERS, strip_punctuation=True):
     """Convert a string to kebab case
 
     Example
@@ -417,4 +417,4 @@ def kebab_case(s, delims=DELIMETERS, strip_punctuation=True):
         Hello World => hello-world
 
     """
-    return Kebab(s, delimeters=delims, strip_punctuation=strip_punctuation).convert()
+    return Kebab(s, delimiters=delims, strip_punctuation=strip_punctuation).convert()

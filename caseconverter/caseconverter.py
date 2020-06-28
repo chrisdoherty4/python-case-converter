@@ -38,15 +38,62 @@ def stripable_punctuation(delimeters):
 
 
 class BoundaryHandler(object):
+    """A boundary handler that both detects and handles a boundary.
+
+    The BoundaryHandler is an interface for a CaseConverter instance.
+    """
+
     def is_boundary(self, pc, c):
+        """Determine if we're on a boundary.
+
+        :param pc: Previous character
+        :param cc: Current character
+        :return: True if a boundary is found, else false.
+        :rtype: boolean
+        """
         raise NotImplementedError()
 
     def handle(self, pc, cc, input_buffer, output_buffer):
+        """Handle a detected boundary.
+
+        :param pc: Previous character
+        :type pc: str
+        :param cc: Current character
+        :type cc: str
+        :param input_buffer: The raw string wrapped in a buffer.
+        :type input_buffer: StringBuffer
+        :param output_buffer: The output buffer that stores the new string as
+            it's constructed.
+        :type output_buffer: StringBuffer
+        """
         raise NotImplementedError()
 
 
 class CaseConverter(object):
     def __init__(self, s, delimeters=DELIMETERS, strip_punctuation=True):
+        """Initialize a case conversion.
+
+        On initialization, punctuation can be optionally stripped. If punctuation
+        is seen in the input string it will appear in the same position in
+        the output string.
+
+        BoundaryHandlers should take into consideration whether or not
+        they are evaluating the first character in a string and whether or
+        not a character is punctuation.
+
+        Delimeters will not be stripped if strip_punctuation is true.
+
+        During initialization the raw input string will be passed through 
+        the prepare_string() method. Child classes should overwrite this 
+        method if they wish to perform pre-conversion checks and manipulate
+        the string accordingly.
+
+        :param s: The raw string to convert.
+        :type s: str
+        :param delimeters: A set of delimeters used to identify boundaries.
+            Defaults to DELIMETERS
+        :type delimeters: str
+        """
         self._delimeters = delimeters
 
         s = s.strip(delimeters)
@@ -66,48 +113,68 @@ class CaseConverter(object):
         self.define_boundaries()
 
     def add_boundary_handler(self, handler):
+        """Add a boundary handler.
+
+        :type handler: BoundaryHandler
+        """
         self._boundary_handlers.append(handler)
 
     def define_boundaries(self):
+        """Define boundary handlers.
+
+        define_boundaries() is called when a CaseConverter is initialized.
+        Typically, a child instance of CaseConverter will add boundary handlers.
+        A CaseConverter without boundary handlers makes little sense, therefore
+        a lack of boundary handlers generates a warning.
+        """
         logger.warn("No boundaries defined")
         return
 
     def delimeters(self):
+        """Retrieve the delimeters.
+
+        :rtype: str
+        """
         return self._delimeters
 
     def raw(self):
+        """Retrieve the raw string to be converted.
+
+        :rtype: str
+        """
         return self._raw_input
 
     def init(self, input_buffer, output_buffer):
-        """Initialize the output buffer
+        """Initialize the output buffer.
+
+        See convert() for call order.
         """
         return
 
     def mutate(self, c):
-        """Whenever we write a character to the buffer, optionally mutate.
+        """Mutate a character that's being added.
+
+        See convert() for call order.
         """
         return c
 
     def prepare_string(self, s) -> str:
-        """Prepare the raw intput string for operation
+        """Prepare the raw intput string for conversion.
+
+        Executed during CaseConverter initialization providing an opportunity
+        for child classes to manipulate the string.
+
+        :param s: The raw string supplied to the CaseConverter constructor.
+        :type s: str
+        :return: A raw string to be used in conversion.
+        :rtype: str
         """
         return s
 
-    def handle_boundary(self, pc, cc, input_buffer, output_buffer):
-        """When we find a boundary as defined by `is_boundary()` then handle it.
-        
-        :param pc: Previous character
-        :param cc: Current character
-        :param input_buffer: Input buffer wrapped around raw input string.
-        :param output_buffer: Output buffer for storing transformed string.
-        """
-        for bh in self._boundary_handlers:
-            if bh.is_boundary(cc):
-                bh.handle(pc, cc, input_buffer, output_buffer)
-                return
-
-    def is_boundary(self, pc, c):
+    def _is_boundary(self, pc, c):
         """Determine if we've hit a boundary or not.
+
+        :rtype: BoundaryHandler
         """
         for bh in self._boundary_handlers:
             if bh.is_boundary(pc, c):
@@ -116,7 +183,9 @@ class CaseConverter(object):
         return None
 
     def convert(self) -> str:
-        """Handle converting the input string to an output string.
+        """Convert the raw string.
+
+        
         """
         self.init(self._input_buffer, self._output_buffer)
 
@@ -132,7 +201,7 @@ class CaseConverter(object):
                     pc, cc, self._input_buffer.tell(), self._output_buffer.getvalue()
                 )
             )
-            bh = self.is_boundary(pc, cc)
+            bh = self._is_boundary(pc, cc)
             if bh:
                 bh.handle(pc, cc, self._input_buffer, self._output_buffer)
             else:

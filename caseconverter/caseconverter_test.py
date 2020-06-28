@@ -238,3 +238,16 @@ def test_flat_with_default_args(input, output):
 )
 def test_kebab_with_default_args(input, output):
     assert kebab_case(input) == output
+
+
+@pytest.mark.parametrize(
+    "input, output",
+    [
+        # With punctuation.
+        ("Hell9o, world!", "hell9oWorld"),
+        ("0Hello, world!", "0helloWorld"),
+        ("Hello, world!0", "helloWorld0"),
+    ],
+)
+def test_with_numbers(input, output):
+    assert camel_case(input) == output

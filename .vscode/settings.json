@@ -1,5 +1,18 @@
 {
     "pythonTestExplorer.testFramework": "pytest",
     "python.testing.pytestEnabled": true,
-    "python.testing.pytestArgs": ["-s", "-v"]
+    "python.testing.pytestArgs": [
+      "-v",
+      "."
+    ],
+    "runOnSave.commands": [
+
+      {
+        "match": ".*\\.py$",
+        "command": "black ${file}",
+        "runIn": "backend",
+      }
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.nosetestsEnabled": false
 }

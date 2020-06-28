@@ -1,113 +1,323 @@
 import re
 import string
+import logging
+import sys
+from io import StringIO
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+
+formatter = logging.Formatter("%(asctime)s : %(name)s : %(levelname)s : %(message)s")
+
+ch.setFormatter(formatter)
+
+logger.addHandler(ch)
+
+
+# 1. Is there a subset of token separation characters? -
+# 2. How do we handle repeat separators? -
+# 3. Should we strip punctuation? -
+# 4. How do we handle integers?
+
+
+class StringBuffer(StringIO):
+    def write(self, s):
+        super(StringBuffer, self).write(s)
+
+
+DELIMETERS = " -_"
+
+
+def stripable_punctuation(delimeters):
+    """Construct a string of stripable punctuation based on delimeters.
+    """
+    return "".join([c for c in string.punctuation if c not in delimeters])
+
+
+class BoundaryHandler(object):
+    def is_boundary(self, pc, c):
+        raise NotImplementedError()
+
+    def handle(self, pc, cc, input_buffer, output_buffer):
+        raise NotImplementedError()
 
 
 class CaseConverter(object):
-    def __init__(self, s):
-        self._string = s
+    def __init__(self, s, delimeters=DELIMETERS, strip_punctuation=True):
+        self._delimeters = delimeters
 
-    @staticmethod
-    def _tokenize(s):
-        """Tokenize strings according to the different string types.
+        s = s.strip(delimeters)
 
-        The string types include flat, kebab, pascal, snake, macro and cobol
-        case. All except flat strings can be split.
+        if strip_punctuation:
+            punctuation = stripable_punctuation(delimeters)
+            s = re.sub("[{}]+".format(re.escape(punctuation)), "", s)
 
-        :param s: The string to split
-        :return: A list of split strings. If the string was not splittable, a
-          list containing the original string.
-        :rtype: list
+        # Change recurring delimeters into single delimeters.
+        s = re.sub("[{}]+".format(re.escape(delimeters)), delimeters[0], s)
+
+        self._raw_input = s
+        self._input_buffer = StringBuffer(self.prepare_string(s))
+        self._output_buffer = StringBuffer()
+        self._boundary_handlers = []
+
+        self.define_boundaries()
+
+    def add_boundary_handler(self, handler):
+        self._boundary_handlers.append(handler)
+
+    def define_boundaries(self):
+        logger.warn("No boundaries defined")
+        return
+
+    def delimeters(self):
+        return self._delimeters
+
+    def raw(self):
+        return self._raw_input
+
+    def init(self, input_buffer, output_buffer):
+        """Initialize the output buffer
         """
-        if not s:
-            return None
+        return
 
-        # Attempt to split snake case and kebab case.
-        groups = re.split("-|_", s)
+    def mutate(self, c):
+        """Whenever we write a character to the buffer, optionally mutate.
+        """
+        return c
 
-        if len(groups) > 1:
-            return groups
+    def prepare_string(self, s) -> str:
+        """Prepare the raw intput string for operation
+        """
+        return s
 
-        # Ensure we don't have a fully capitalized string because that results
-        # in the following regex splitting each individual character.
-        #
-        # 'HELLOWORLD' => ['H', 'E', 'L', 'L', ...]
-        if re.match("^[A-Z]+$", s):
-            return [s]
+    def handle_boundary(self, pc, cc, input_buffer, output_buffer):
+        """When we find a boundary as defined by `is_boundary()` then handle it.
+        
+        :param pc: Previous character
+        :param cc: Current character
+        :param input_buffer: Input buffer wrapped around raw input string.
+        :param output_buffer: Output buffer for storing transformed string.
+        """
+        for bh in self._boundary_handlers:
+            if bh.is_boundary(cc):
+                bh.handle(pc, cc, input_buffer, output_buffer)
+                return
 
-        firstCharStore = s[0]
-        s = firstCharStore.upper() + s[1:]
+    def is_boundary(self, pc, c):
+        """Determine if we've hit a boundary or not.
+        """
+        for bh in self._boundary_handlers:
+            if bh.is_boundary(pc, c):
+                return bh
 
-        groups = re.findall("[A-Z][^A-Z]*", s)
+        return None
 
-        groups[0] = firstCharStore + groups[0][1:]
+    def convert(self) -> str:
+        """Handle converting the input string to an output string.
+        """
+        self.init(self._input_buffer, self._output_buffer)
 
-        return groups
+        logger.debug("input_buffer = {}".format(self._input_buffer.getvalue()))
 
-    @staticmethod
-    def _lower(l):
-        return map(lambda s: s.lower(), l)
+        # Previous character (pc) and current character (cc)
+        pc = None
+        cc = self._input_buffer.read(1)
 
-    @staticmethod
-    def _upper(l):
-        return map(lambda s: s.upper(), l)
+        while cc:
+            logger.debug(
+                "pc = '{}'; cc = '{}'; input_buffer.tell() = {}; output_buffer = '{}'".format(
+                    pc, cc, self._input_buffer.tell(), self._output_buffer.getvalue()
+                )
+            )
+            bh = self.is_boundary(pc, cc)
+            if bh:
+                bh.handle(pc, cc, self._input_buffer, self._output_buffer)
+            else:
+                self._output_buffer.write(self.mutate(cc))
 
-    @staticmethod
-    def _capitalize(l):
-        return map(lambda s: s.capitalize(), l)
+            pc = cc
+            cc = self._input_buffer.read(1)
 
-    def flat(self):
-        return "".join(self._lower(self._tokenize(self._string)))
-
-    def kebab(self):
-        return "-".join(self._lower(self._tokenize(self._string)))
-
-    def pascal(self):
-        return "".join(self._capitalize(self._tokenize(self._string)))
-
-    def snake(self):
-        return "_".join(self._lower(self._tokenize(self._string)))
-
-    def macro(self):
-        return "_".join(self._upper(self._tokenize(self._string)))
-
-    def cobol(self):
-        return "-".join(self._upper(self._tokenize(self._string)))
-
-    def camel(self):
-        tokens = self._tokenize(self._string)
-
-        if len(tokens) == 1:
-            return tokens[0].lower()
-
-        formattedTokens = [tokens[0].lower()]
-        formattedTokens.extend(self._capitalize(tokens[1:]))
-
-        return "".join(formattedTokens)
+        return self._output_buffer.getvalue()
 
 
-def flat_case(s):
-    """Convert a string to flat case
+class OnDelimeterUppercaseNext(BoundaryHandler):
+    def __init__(self, delimeters, join_char=""):
+        self._delimeters = delimeters
+        self._join_char = join_char
+
+    def is_boundary(self, pc, c):
+        return c in self._delimeters
+
+    def handle(self, pc, cc, input_buffer, output_buffer):
+        output_buffer.write(self._join_char)
+        output_buffer.write(input_buffer.read(1).upper())
+
+
+class OnDelimeterLowercaseNext(BoundaryHandler):
+    def __init__(self, delimeters, join_char=""):
+        self._delimeters = delimeters
+        self._join_char = join_char
+
+    def is_boundary(self, pc, c):
+        return c in self._delimeters
+
+    def handle(self, pc, cc, input_buffer, output_buffer):
+        output_buffer.write(self._join_char)
+        output_buffer.write(input_buffer.read(1).lower())
+
+
+class OnUpperPrecededByLowerAppendUpper(BoundaryHandler):
+    def __init__(self, join_char=""):
+        self._join_char = join_char
+
+    def is_boundary(self, pc, c):
+        return pc != None and pc.isalpha() and pc.islower() and c.isupper()
+
+    def handle(self, pc, cc, input_buffer, output_buffer):
+        output_buffer.write(self._join_char)
+        output_buffer.write(cc)
+
+
+class OnUpperPrecededByLowerAppendLower(BoundaryHandler):
+    def __init__(self, join_char=""):
+        self._join_char = join_char
+
+    def is_boundary(self, pc, c):
+        return pc != None and pc.isalpha() and pc.islower() and c.isupper()
+
+    def handle(self, pc, cc, input_buffer, output_buffer):
+        output_buffer.write(self._join_char)
+        output_buffer.write(cc.lower())
+
+
+class Camel(CaseConverter):
+    def define_boundaries(self):
+        self.add_boundary_handler(OnDelimeterUppercaseNext(self.delimeters()))
+        self.add_boundary_handler(OnUpperPrecededByLowerAppendUpper())
+
+    def prepare_string(self, s):
+        if s.isupper():
+            return s.lower()
+
+        return s
+
+    def mutate(self, c):
+        return c.lower()
+
+
+class Pascal(Camel):
+    def init(self, input_buffer, output_buffer):
+        output_buffer.write(input_buffer.read(1).upper())
+
+
+class Snake(CaseConverter):
+
+    JOIN_CHAR = "_"
+
+    def define_boundaries(self):
+        self.add_boundary_handler(
+            OnDelimeterLowercaseNext(self.delimeters(), self.JOIN_CHAR)
+        )
+        self.add_boundary_handler(OnUpperPrecededByLowerAppendLower(self.JOIN_CHAR))
+
+    def prepare_string(self, s):
+        if s.isupper():
+            return s.lower()
+
+        return s
+
+    def mutate(self, c):
+        return c.lower()
+
+
+class Flat(Snake):
+
+    JOIN_CHAR = ""
+
+
+class Kebab(Snake):
+
+    JOIN_CHAR = "-"
+
+
+class Cobol(CaseConverter):
+
+    JOIN_CHAR = "-"
+
+    def define_boundaries(self):
+        self.add_boundary_handler(
+            OnDelimeterUppercaseNext(self.delimeters(), self.JOIN_CHAR)
+        )
+        self.add_boundary_handler(OnUpperPrecededByLowerAppendUpper(self.JOIN_CHAR))
+
+    def convert(self):
+        if self.raw().isupper():
+            return re.sub(
+                "[{}]+".format(re.escape(self.delimeters())),
+                self.JOIN_CHAR,
+                self.raw(),
+            )
+
+        return super(Cobol, self).convert()
+
+    def mutate(self, c):
+        return c.upper()
+
+
+class Macro(Cobol):
+
+    JOIN_CHAR = "_"
+
+
+def camel_case(s, delims=DELIMETERS, strip_punctuation=True):
+    """Convert a string to camel case.
+
+    Example
+    
+      Hello World => helloWorld
+
+    """
+    return Camel(s, delimeters=delims, strip_punctuation=strip_punctuation).convert()
+
+
+def cobol_case(s, delims=DELIMETERS, strip_punctuation=True):
+    """Convert a string to cobol case
 
     Example
 
-        Hello World => helloworld
+      Hello World => HELLO-WORLD
 
     """
-    return CaseConverter(s).flat()
+    return Cobol(s, delimeters=delims, strip_punctuation=strip_punctuation).convert()
 
 
-def kebab_case(s):
-    """Convert a string to kebab case
+def macro_case(s, delims=DELIMETERS, strip_punctuation=True):
+    """Convert a string to macro case
 
     Example
 
-        Hello World => hello-world
+        Hello World => HELLO_WORLD
 
     """
-    return CaseConverter(s).kebab()
+    return Macro(s, delimeters=delims, strip_punctuation=strip_punctuation).convert()
 
 
-def pascal_case(s):
+def snake_case(s, delims=DELIMETERS, strip_punctuation=True):
+    """Convert a string to snake case.
+
+    Example
+
+        Hello World => hello_world
+
+    """
+    return Snake(s, delimeters=delims, strip_punctuation=strip_punctuation).convert()
+
+
+def pascal_case(s, delims=DELIMETERS, strip_punctuation=True):
     """Convert a string to pascal case
 
     Example
@@ -116,125 +326,26 @@ def pascal_case(s):
         hello world => HelloWorld
 
     """
-    return CaseConverter(s).pascal()
+    return Pascal(s, delimeters=delims, strip_punctuation=strip_punctuation).convert()
 
 
-def snake_case(s):
-    """Convert a string to snake case.
-
-    Example
-
-        Hello World => hello_world
-
-    """
-    return CaseConverter(s).snake()
-
-
-def macro_case(s):
-    """Convert a string to macro case
+def flat_case(s, delims=DELIMETERS, strip_punctuation=True):
+    """Convert a string to flat case
 
     Example
 
-        Hello World => HELLO_WORLD
+        Hello World => helloworld
 
     """
-    return CaseConverter(s).macro()
+    return Flat(s, delimeters=delims, strip_punctuation=strip_punctuation).convert()
 
 
-def cobol_case(s, delims=" _-", strip_punctuation=True):
-    """Convert a string to cobol case
+def kebab_case(s, delims=DELIMETERS, strip_punctuation=True):
+    """Convert a string to kebab case
 
     Example
 
-      Hello World => HELLO-WORLD
+        Hello World => hello-world
 
     """
-    s = s.strip(delims)
-
-    if strip_punctuation:
-        s = _strip_punctuation(s, _strippable_punctuation(delims))
-
-    s = _reduce_delims(s, delims)
-
-    def mutate(m):
-        # Remove NoneType which reduces the matches down to 1, hence index 0.
-        return "-" + list(filter(lambda m: m != None, m.groups()))[0]
-
-    s = _mutate_tokens(
-        s,
-        "(?<=[{}]|[A-Z])([a-zA-Z]+)".format(re.escape(delims)),
-        mutate,
-    )
-    
-    delims = delims.replace("-", "")
-
-    return _strip_delims(s, delims).upper()
-
-
-def camel_case(s, delims=" _-", strip_punctuation=True):
-    """Convert a string to camel case.
-
-    Example
-    
-      Hello World => helloWorld
-
-    """
-    # return CaseConverter(s).camel()
-
-    # hello world
-    # Hello World
-    # hello-world
-    # what's new
-    # hello_world
-    # helloworld
-
-    # 1. Is there a subset of token separation characters?
-    # 2. How do we handle repeat separators?
-    # 3. Should we strip punctuation?
-    # 4. How do we handle integers?
-
-    # Inputs:
-    #   1. characters to split tokens on
-    #   2. string
-    #   3. should we strip punctuation?
-
-    # strip all punctuation that is not a delimeter
-    # reduce delimeters down to single instance
-    # lowercase all characters
-    # uppercase any char preceeded by a delimeter
-    # remove all delimeters
-
-    s = s.strip(delims).lower()
-
-    if strip_punctuation:
-        s = _strip_punctuation(s, _strippable_punctuation(delims))
-
-    s = _reduce_delims(s, delims)
-
-    s = _mutate_tokens(
-        s,
-        "(?<=[{}])([a-z]+)".format(re.escape(delims)),
-        lambda m: m.group(1).capitalize(),
-    )
-
-    return _strip_delims(s, delims)
-
-
-def _strip_punctuation(s, chars):
-    return re.sub("[{}]+".format(re.escape(chars)), "", s)
-
-
-def _strippable_punctuation(delims):
-    return "".join([c for c in string.punctuation if c not in delims])
-
-
-def _reduce_delims(s, delims):
-    return re.sub("[{}]+".format(re.escape(delims)), delims[0], s)
-
-
-def _mutate_tokens(s, token_regex, func):
-    return re.sub(token_regex, func, s)
-
-
-def _strip_delims(s, delims):
-    return re.sub("[{}]+".format(re.escape(delims)), "", s)
+    return Kebab(s, delimeters=delims, strip_punctuation=strip_punctuation).convert()

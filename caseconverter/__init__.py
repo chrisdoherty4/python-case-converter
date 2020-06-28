@@ -5,5 +5,6 @@ from .caseconverter import (
     flat_case,
     snake_case,
     macro_case,
-    pascal_case
+    pascal_case,
+    DELIMETERS,
 )

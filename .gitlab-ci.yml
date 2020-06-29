@@ -1,0 +1,22 @@
+stages:
+  - test
+  - deploy
+
+test:
+  stage: test
+  image: python:3.8-alpine
+  before_script:
+    - pip install pytest
+    - pip install -e .
+  script:
+    - pytest $(find -name "*_test.py")
+
+deploy:
+  stage: deploy
+  image: python:3.8-buster
+  before_script:
+    - pip install twine
+  script:
+    - python ./setup.py sdist bdist_wheel
+    - twine check dist/*
+    - twine upload --repository-url https://test.pypi.org/ dist/*

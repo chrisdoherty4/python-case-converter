@@ -14,5 +14,5 @@ from .caseconverter import (
     snake_case,
     macro_case,
     pascal_case,
-    DELIMETERS,
+    DELIMITERS,
 )

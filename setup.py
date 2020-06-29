@@ -7,8 +7,8 @@ with open(path.join(this_directory, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
 setup(
-    name="CaseConverter",
-    version="0.0.1",
+    name="case-converter",
+    version="0.0.2",
     url="https://github.com/chrisdoherty4/python-case-converter",
     packages=find_packages(exclude=["*_test.py"]),
     author="Chris Doherty",
@@ -23,5 +23,6 @@ setup(
         "Natural Language :: English",
         "Topic :: Utilities",
         "Topic :: Text Processing",
+        "Programming Language :: Python :: 3",
     ],
 )

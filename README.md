@@ -1,10 +1,11 @@
 # Case Converter
 
-A python package for converting string cases.
+A python package for transforming string cases such as `Hell, world!` into
+camel case, `helloWorld`.
 
 ## General usage
 
-You can import a case conversion helper function, or the conversion object itself.
+Import a case conversion helper function, or the conversion object itself.
 
 ```python
 from caseconverter import camel_case, Camel
@@ -79,9 +80,6 @@ Hello, world! => HELLO-WORLD
 ```text
 Hello, world! => HELLO_WORLD
 ```
-
-### 
-
 
 ## Contributing
 

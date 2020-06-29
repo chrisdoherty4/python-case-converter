@@ -1,9 +1,9 @@
 stages:
-  - test
+  - build
   - deploy
 
-test:
-  stage: test
+build:
+  stage: build
   image: python:3.8-alpine
   before_script:
     - pip install pytest

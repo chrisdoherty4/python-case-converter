@@ -93,6 +93,9 @@ class CaseConverter(object):
         Delimeters are taken into consideration when defining stripable
         punctuation.
 
+        Delimeters will be reduced to single instances of a delimeter. This 
+        includes transforming `   -_-__  `  to `-`.
+
         During initialization, the raw input string will be passed through 
         the prepare_string() method. Child classes should override this 
         method if they wish to perform pre-conversion checks and manipulate

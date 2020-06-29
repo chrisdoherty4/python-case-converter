@@ -23,7 +23,7 @@ deploy:
   rules:
     # Only execute deployment if we're on a release branch and have /release
     # in the commit message.
-    - if: '$CI_COMMIT_TITLE =~ /^\/release/ && $CI_COMMIT_REF_NAME =~ /^v.*/'
+    - if: '$CI_COMMIT_TAG =~ /^v.*/'
   before_script:
     - pip install twine
   script:

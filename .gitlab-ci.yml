@@ -22,7 +22,7 @@ deploy:
   image: python:3.8-buster
   rules:
     - if: '$CI_COMMIT_TITLE =~ /^\/release/'
-    # - if: '$CI_COMMIT_REF_NAME =~ /^v.*/'
+    - if: '$CI_COMMIT_REF_NAME =~ /^v.*/'
   before_script:
     - pip install twine
   script:

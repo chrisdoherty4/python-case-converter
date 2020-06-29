@@ -1,6 +1,6 @@
 # Case Converter
 
-![pipline](https://gitlab.com/chrisdoherty4/python-case-converter/badges/master/pipeline.svg)
+[![pipline](https://img.shields.io/gitlab/pipeline/chrisdoherty4/python-case-converter)](https://gitlab.com/chrisdoherty4/python-case-converter/-/pipelines) [![wheel](https://img.shields.io/pypi/wheel/case-converter)](https://pypi.org/project/case-converter/) ![coverage](https://gitlab.com/chrisdoherty4/python-case-converter/badges/master/coverage.svg) ![license](https://img.shields.io/github/license/chrisdoherty4/python-case-converter)
 
 A robust python package for transforming string cases such as `Hello, world!` into
  `helloWorld` (camelcase).

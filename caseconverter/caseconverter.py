@@ -374,7 +374,7 @@ class Macro(Cobol):
     JOIN_CHAR = "_"
 
 
-def camel_case(s, **kwargs):
+def camelcase(s, **kwargs):
     """Convert a string to camel case.
 
     Example
@@ -385,7 +385,7 @@ def camel_case(s, **kwargs):
     return Camel(s, **kwargs).convert()
 
 
-def cobol_case(s, **kwargs):
+def cobolcase(s, **kwargs):
     """Convert a string to cobol case
 
     Example
@@ -396,7 +396,7 @@ def cobol_case(s, **kwargs):
     return Cobol(s, **kwargs).convert()
 
 
-def macro_case(s, **kwargs):
+def macrocase(s, **kwargs):
     """Convert a string to macro case
 
     Example
@@ -407,7 +407,7 @@ def macro_case(s, **kwargs):
     return Macro(s, **kwargs).convert()
 
 
-def snake_case(s, **kwargs):
+def snakecase(s, **kwargs):
     """Convert a string to snake case.
 
     Example
@@ -418,7 +418,7 @@ def snake_case(s, **kwargs):
     return Snake(s, **kwargs).convert()
 
 
-def pascal_case(s, **kwargs):
+def pascalcase(s, **kwargs):
     """Convert a string to pascal case
 
     Example
@@ -430,7 +430,7 @@ def pascal_case(s, **kwargs):
     return Pascal(s, **kwargs).convert()
 
 
-def flat_case(s, **kwargs):
+def flatcase(s, **kwargs):
     """Convert a string to flat case
 
     Example
@@ -441,7 +441,7 @@ def flat_case(s, **kwargs):
     return Flat(s, **kwargs).convert()
 
 
-def kebab_case(s, **kwargs):
+def kebabcase(s, **kwargs):
     """Convert a string to kebab case
 
     Example

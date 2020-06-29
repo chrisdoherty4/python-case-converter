@@ -2,30 +2,47 @@
 
 ![pipline](https://gitlab.com/chrisdoherty4/python-case-converter/badges/master/pipeline.svg)
 
-A python package for transforming string cases such as `Hell, world!` into
-camel case, `helloWorld`.
+A robust python package for transforming string cases such as `Hello, world!` into
+ `helloWorld` (camelcase).
 
 ## General usage
 
 Import a case conversion helper function, or the conversion object itself.
 
 ```python
-from caseconverter import camel_case, Camel
+from caseconverter import camelcase, Camel
 
-camel_case("Hello, world!") # helloWorld
-Camel("Hello, world!").convert() # helloWorld
+camelcase("Hello, world!") # output: helloWorld
+Camel("Hello, world!").convert() # output: helloWorld
 ```
+
+By default, case conversion takes into consideration 2 boundary conditions for
+token separation.
+
+1. Delimiters.
+2. Lowercase char followed by an uppercase char.
+
+The action taken when a boundary is identified depends on the case conversion.
+
+If the input string is all uppercase it can only be processed based on delimiters.
 
 #### Customizing delimiters
 
-There are a set of default delimiters used to denote a character boundary.
-These delimiters are defined in caseconverter.py as `DELIMITER`.
+Default delimiters used to denote a token boundary.
 
 ```python
-from caseconverter import camel_case
+# Default delimiters
+DELIMITERS = " -_"
+```
+
+You can pass `delims` to each case conversion function to specify a custom
+set of delimiters.
+
+```python
+from caseconverter import camelcase
 
 # Use a pipe `|` as the only delimiter.
-camel_case("Hello,|world!", delims="|") # helloWorld
+camelcase("Hello,|world!", delims="|") # output: helloWorld
 ```
 
 #### Stripping punctuation
@@ -34,53 +51,96 @@ Generally, punctuation is stripped when doing a case conversion. However, should
 wish to keep the punctuation you can do so by passing `strip_punctuation=False`.
 
 ```python
-from caseconverter import camel_case
+from caseconverter import camelcase
 
-camel_case("Hello, world!", strip_punctuation=False) # hello,World!
+camelcase("Hello, world!", strip_punctuation=False) # output: hello,World!
 ```
 
 ## Available conversions
 
-### Camel case
+### `camelcase`
 
-```text
-Hello, world! => helloWorld
+```python
+from caseconverter import camelcase
+
+camelcase("Hello, world!") 
 ```
 
-### Pascal case
-
 ```text
-Hello, world! => HelloWorld
+helloWorld
 ```
 
-### Snake case
+### `pascalcase`
 
-```text
-Hello, world! => hello_world
+```python
+from caseconverter import pascalcase
+
+pascalcase("Hello, world!")
 ```
 
-### Flat case
-
 ```text
-Hello, world! => helloworld
+HelloWorld
 ```
 
-### Kebab case
+### `snakecase`
 
-```text
-Hello, world! => hello-world
+```python
+from caseconverter import snakecase
+
+snakecase("Hello, world!")
 ```
 
-### Cobol case
-
 ```text
-Hello, world! => HELLO-WORLD
+hello_world
 ```
 
-### Macro case
+### `flatcase`
+
+```python
+from caseconverter import flatcase
+
+flatcase("Hello, world!")
+```
 
 ```text
-Hello, world! => HELLO_WORLD
+helloworld
+```
+
+### `kebabcase`
+
+```python
+
+from caseconverter import kebabcase
+
+kebabcase("Hello, world!")
+```
+
+```text
+hello-world
+```
+
+### `cobolcase`
+
+```python
+from caseconverter import cobolcase
+
+cobolcase("Hello, world!")
+```
+
+```text
+HELLO-WORLD
+```
+
+### `macrocase`
+
+```python
+from caseconverter import macrocase
+
+macrocase("Hello, world!")
+```
+
+```text
+HELLO_WORLD
 ```
 
 ## Contributing

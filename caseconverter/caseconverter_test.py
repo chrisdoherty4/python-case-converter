@@ -33,7 +33,7 @@ from .caseconverter import *
     ],
 )
 def test_camel_with_default_args(input, output):
-    assert camel_case(input) == output
+    assert camelcase(input) == output
 
 
 @pytest.mark.parametrize(
@@ -67,7 +67,7 @@ def test_camel_with_default_args(input, output):
     ],
 )
 def test_cobol_with_default_args(input, output):
-    assert cobol_case(input) == output
+    assert cobolcase(input) == output
 
 
 @pytest.mark.parametrize(
@@ -101,7 +101,7 @@ def test_cobol_with_default_args(input, output):
     ],
 )
 def test_macro_with_default_args(input, output):
-    assert macro_case(input) == output
+    assert macrocase(input) == output
 
 
 @pytest.mark.parametrize(
@@ -135,7 +135,7 @@ def test_macro_with_default_args(input, output):
     ],
 )
 def test_snake_with_default_args(input, output):
-    assert snake_case(input) == output
+    assert snakecase(input) == output
 
 
 @pytest.mark.parametrize(
@@ -169,7 +169,7 @@ def test_snake_with_default_args(input, output):
     ],
 )
 def test_pascal_with_default_args(input, output):
-    assert pascal_case(input) == output
+    assert pascalcase(input) == output
 
 
 @pytest.mark.parametrize(
@@ -203,7 +203,7 @@ def test_pascal_with_default_args(input, output):
     ],
 )
 def test_flat_with_default_args(input, output):
-    assert flat_case(input) == output
+    assert flatcase(input) == output
 
 
 @pytest.mark.parametrize(
@@ -237,7 +237,7 @@ def test_flat_with_default_args(input, output):
     ],
 )
 def test_kebab_with_default_args(input, output):
-    assert kebab_case(input) == output
+    assert kebabcase(input) == output
 
 
 @pytest.mark.parametrize(
@@ -250,7 +250,7 @@ def test_kebab_with_default_args(input, output):
     ],
 )
 def test_with_numbers(input, output):
-    assert camel_case(input) == output
+    assert camelcase(input) == output
 
 
 @pytest.mark.parametrize(
@@ -261,4 +261,4 @@ def test_with_numbers(input, output):
     ],
 )
 def test_no_strip_punctuation(input, output):
-    assert camel_case(input, strip_punctuation=False) == output
+    assert camelcase(input, strip_punctuation=False) == output

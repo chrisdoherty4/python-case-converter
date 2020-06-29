@@ -1,5 +1,7 @@
 # Case Converter
 
+![pipline](https://gitlab.com/chrisdoherty4/python-case-converter/badges/master/pipeline.svg)
+
 A python package for transforming string cases such as `Hell, world!` into
 camel case, `helloWorld`.
 

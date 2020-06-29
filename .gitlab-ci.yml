@@ -21,8 +21,9 @@ deploy:
   stage: deploy
   image: python:3.8-buster
   rules:
-    - if: '$CI_COMMIT_TITLE =~ /^\/release/'
-    - if: '$CI_COMMIT_REF_NAME =~ /^v.*/'
+    # Only execute deployment if we're on a release branch and have /release
+    # in the commit message.
+    - if: '$CI_COMMIT_TITLE =~ /^\/release/ && $CI_COMMIT_REF_NAME =~ /^v.*/'
   before_script:
     - pip install twine
   script:

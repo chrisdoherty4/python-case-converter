@@ -24,6 +24,11 @@ logger.addHandler(ch)
 
 
 class StringBuffer(StringIO):
+    """StringBuffer is a wrapper around StringIO.
+
+    By wrapping StringIO, adding debugging information is easy.
+    """
+
     def write(self, s):
         super(StringBuffer, self).write(s)
 
@@ -33,14 +38,18 @@ DELIMITERS = " -_"
 
 def stripable_punctuation(delimiters):
     """Construct a string of stripable punctuation based on delimiters.
+
+    Stripable punctuation is defined as all punctuation that is not a delimeter.
     """
     return "".join([c for c in string.punctuation if c not in delimiters])
 
 
 class BoundaryHandler(object):
-    """A boundary handler that both detects and handles a boundary.
+    """Detect and handle boundaries in a string.
 
-    The BoundaryHandler is an interface for a CaseConverter instance.
+    The BoundaryHandler is an interface for a CaseConverter instance. It provides
+    methods for detecting a boundary in a string as well as how to handle
+    the boundary.
     """
 
     def is_boundary(self, pc, c):
@@ -73,18 +82,19 @@ class CaseConverter(object):
     def __init__(self, s, delimiters=DELIMITERS, strip_punctuation=True):
         """Initialize a case conversion.
 
-        On initialization, punctuation can be optionally stripped. If punctuation
-        is seen in the input string it will appear in the same position in
-        the output string.
+        On initialization, punctuation can be optionally stripped. If
+        punctuation is not stripped, it will appear in the output at the
+        same position as the input.
 
         BoundaryHandlers should take into consideration whether or not
         they are evaluating the first character in a string and whether or
         not a character is punctuation.
 
-        Delimeters will not be stripped if strip_punctuation is true.
+        Delimeters are taken into consideration when defining stripable
+        punctuation.
 
-        During initialization the raw input string will be passed through 
-        the prepare_string() method. Child classes should overwrite this 
+        During initialization, the raw input string will be passed through 
+        the prepare_string() method. Child classes should override this 
         method if they wish to perform pre-conversion checks and manipulate
         the string accordingly.
 
@@ -123,9 +133,10 @@ class CaseConverter(object):
         """Define boundary handlers.
 
         define_boundaries() is called when a CaseConverter is initialized.
-        Typically, a child instance of CaseConverter will add boundary handlers.
-        A CaseConverter without boundary handlers makes little sense, therefore
-        a lack of boundary handlers generates a warning.
+        define_boundaries() should be overridden in a child class to add
+        boundary handlers.
+
+        A CaseConverter without boundary handlers makes little sense.
         """
         logger.warn("No boundaries defined")
         return
@@ -147,12 +158,16 @@ class CaseConverter(object):
     def init(self, input_buffer, output_buffer):
         """Initialize the output buffer.
 
+        Can be overridden.
+
         See convert() for call order.
         """
         return
 
     def mutate(self, c):
-        """Mutate a character that's being added.
+        """Mutate a character not on a boundary.
+
+        Can be overridden.
 
         See convert() for call order.
         """
@@ -162,7 +177,10 @@ class CaseConverter(object):
         """Prepare the raw intput string for conversion.
 
         Executed during CaseConverter initialization providing an opportunity
-        for child classes to manipulate the string.
+        for child classes to manipulate the string. By default, the string
+        is not manipulated.
+
+        Can be overridden.
 
         :param s: The raw string supplied to the CaseConverter constructor.
         :type s: str
@@ -185,7 +203,18 @@ class CaseConverter(object):
     def convert(self) -> str:
         """Convert the raw string.
 
-        
+        convert() follows a series of steps.
+
+            1. Initialize the output buffer using `init()`.
+            For every character in the input buffer:
+            2. Check if the current position lies on a boundary as defined
+               by the BoundaryHandler instances.
+            3. If on a boundary, execute the handler.
+            4. Else apply a mutation to the character via `mutate()` and add
+               the mutated character to the output buffer.
+    
+        :return: The converted string.
+        :rtype: str
         """
         self.init(self._input_buffer, self._output_buffer)
 
@@ -342,7 +371,7 @@ class Macro(Cobol):
     JOIN_CHAR = "_"
 
 
-def camel_case(s, delims=DELIMITERS, strip_punctuation=True):
+def camel_case(s, **kwargs):
     """Convert a string to camel case.
 
     Example
@@ -350,10 +379,10 @@ def camel_case(s, delims=DELIMITERS, strip_punctuation=True):
       Hello World => helloWorld
 
     """
-    return Camel(s, delimiters=delims, strip_punctuation=strip_punctuation).convert()
+    return Camel(s, **kwargs).convert()
 
 
-def cobol_case(s, delims=DELIMITERS, strip_punctuation=True):
+def cobol_case(s, **kwargs):
     """Convert a string to cobol case
 
     Example
@@ -361,10 +390,10 @@ def cobol_case(s, delims=DELIMITERS, strip_punctuation=True):
       Hello World => HELLO-WORLD
 
     """
-    return Cobol(s, delimiters=delims, strip_punctuation=strip_punctuation).convert()
+    return Cobol(s, **kwargs).convert()
 
 
-def macro_case(s, delims=DELIMITERS, strip_punctuation=True):
+def macro_case(s, **kwargs):
     """Convert a string to macro case
 
     Example
@@ -372,10 +401,10 @@ def macro_case(s, delims=DELIMITERS, strip_punctuation=True):
         Hello World => HELLO_WORLD
 
     """
-    return Macro(s, delimiters=delims, strip_punctuation=strip_punctuation).convert()
+    return Macro(s, **kwargs).convert()
 
 
-def snake_case(s, delims=DELIMITERS, strip_punctuation=True):
+def snake_case(s, **kwargs):
     """Convert a string to snake case.
 
     Example
@@ -383,10 +412,10 @@ def snake_case(s, delims=DELIMITERS, strip_punctuation=True):
         Hello World => hello_world
 
     """
-    return Snake(s, delimiters=delims, strip_punctuation=strip_punctuation).convert()
+    return Snake(s, **kwargs).convert()
 
 
-def pascal_case(s, delims=DELIMITERS, strip_punctuation=True):
+def pascal_case(s, **kwargs):
     """Convert a string to pascal case
 
     Example
@@ -395,10 +424,10 @@ def pascal_case(s, delims=DELIMITERS, strip_punctuation=True):
         hello world => HelloWorld
 
     """
-    return Pascal(s, delimiters=delims, strip_punctuation=strip_punctuation).convert()
+    return Pascal(s, **kwargs).convert()
 
 
-def flat_case(s, delims=DELIMITERS, strip_punctuation=True):
+def flat_case(s, **kwargs):
     """Convert a string to flat case
 
     Example
@@ -406,10 +435,10 @@ def flat_case(s, delims=DELIMITERS, strip_punctuation=True):
         Hello World => helloworld
 
     """
-    return Flat(s, delimiters=delims, strip_punctuation=strip_punctuation).convert()
+    return Flat(s, **kwargs).convert()
 
 
-def kebab_case(s, delims=DELIMITERS, strip_punctuation=True):
+def kebab_case(s, **kwargs):
     """Convert a string to kebab case
 
     Example
@@ -417,4 +446,4 @@ def kebab_case(s, delims=DELIMITERS, strip_punctuation=True):
         Hello World => hello-world
 
     """
-    return Kebab(s, delimiters=delims, strip_punctuation=strip_punctuation).convert()
+    return Kebab(s, **kwargs).convert()

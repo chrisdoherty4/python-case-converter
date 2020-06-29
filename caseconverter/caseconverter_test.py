@@ -251,3 +251,14 @@ def test_kebab_with_default_args(input, output):
 )
 def test_with_numbers(input, output):
     assert camel_case(input) == output
+
+
+@pytest.mark.parametrize(
+    "input, output",
+    [
+        # With punctuation.
+        ("Hello, world!", "hello,World!"),
+    ],
+)
+def test_no_strip_punctuation(input, output):
+    assert camel_case(input, strip_punctuation=False) == output

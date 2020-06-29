@@ -6,10 +6,10 @@ build:
   stage: build
   image: python:3.8-alpine
   before_script:
-    - pip install pytest
+    - pip install pytest pytest-cov
     - pip install -e .
   script:
-    - pytest $(find -name "*_test.py")
+    - pytest --cov-report=term --cov=caseconverter **/*_test.py
   after_script:
     - python ./setup.py sdist bdist_wheel
   artifacts:

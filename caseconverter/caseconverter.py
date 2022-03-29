@@ -283,7 +283,7 @@ class OnUpperPrecededByLowerAppendLower(BoundaryHandler):
         output_buffer.write(cc.lower())
 
 
-class OnUpperPrecededByUpperInsertJoin(BoundaryHandler):
+class OnUpperPrecededByUpperAppendJoin(BoundaryHandler):
     def __init__(self, join_char=""):
         self._join_char = join_char
 
@@ -292,6 +292,17 @@ class OnUpperPrecededByUpperInsertJoin(BoundaryHandler):
 
     def handle(self, pc, cc, input_buffer, output_buffer):
         output_buffer.write(self._join_char)
+        output_buffer.write(cc)
+
+
+class OnUpperPrecededByUpperAppendCurrent(BoundaryHandler):
+    def __init__(self, join_char=""):
+        self._join_char = join_char
+
+    def is_boundary(self, pc, c):
+        return pc != None and pc.isalpha() and pc.isupper() and c.isupper()
+
+    def handle(self, pc, cc, input_buffer, output_buffer):
         output_buffer.write(cc)
 
 
@@ -313,6 +324,10 @@ class Camel(CaseConverter):
 class Pascal(Camel):
     def init(self, input_buffer, output_buffer):
         output_buffer.write(input_buffer.read(1).upper())
+
+    def define_boundaries(self):
+        super(Pascal, self).define_boundaries()
+        self.add_boundary_handler(OnUpperPrecededByUpperAppendCurrent())
 
 
 class Snake(CaseConverter):
@@ -375,7 +390,7 @@ class Macro(Cobol):
 
     def define_boundaries(self):
         super(Macro, self).define_boundaries()
-        self.add_boundary_handler(OnUpperPrecededByUpperInsertJoin(self.JOIN_CHAR))
+        self.add_boundary_handler(OnUpperPrecededByUpperAppendJoin(self.JOIN_CHAR))
 
 
 def camelcase(s, **kwargs):

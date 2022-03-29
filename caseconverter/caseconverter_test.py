@@ -167,6 +167,7 @@ def test_snake_with_default_args(input, output):
         ),
         # Alternating character cases
         ("heLlo WoRld", "HeLloWoRld"),
+        ("helloWORLD", "HelloWORLD"),
     ],
 )
 def test_pascal_with_default_args(input, output):

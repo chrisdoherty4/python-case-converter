@@ -1,27 +1,15 @@
 import re
 import string
 import logging
-import sys
 from io import StringIO
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
-
-formatter = logging.Formatter("%(asctime)s : %(name)s : %(levelname)s : %(message)s")
-
-ch.setFormatter(formatter)
-
+ch.setFormatter(logging.Formatter("%(asctime)s : %(name)s : %(levelname)s : %(message)s"))
 logger.addHandler(ch)
-
-
-# 1. Is there a subset of token separation characters? -
-# 2. How do we handle repeat separators? -
-# 3. Should we strip punctuation? -
-# 4. How do we handle integers?
-
 
 class StringBuffer(StringIO):
     """StringBuffer is a wrapper around StringIO.
@@ -295,6 +283,18 @@ class OnUpperPrecededByLowerAppendLower(BoundaryHandler):
         output_buffer.write(cc.lower())
 
 
+class OnUpperPrecededByUpperInsertJoin(BoundaryHandler):
+    def __init__(self, join_char=""):
+        self._join_char = join_char
+
+    def is_boundary(self, pc, c):
+        return pc != None and pc.isalpha() and pc.isupper() and c.isupper()
+
+    def handle(self, pc, cc, input_buffer, output_buffer):
+        output_buffer.write(self._join_char)
+        output_buffer.write(cc)
+
+
 class Camel(CaseConverter):
     def define_boundaries(self):
         self.add_boundary_handler(OnDelimeterUppercaseNext(self.delimiters()))
@@ -372,6 +372,10 @@ class Cobol(CaseConverter):
 class Macro(Cobol):
 
     JOIN_CHAR = "_"
+
+    def define_boundaries(self):
+        super(Macro, self).define_boundaries()
+        self.add_boundary_handler(OnUpperPrecededByUpperInsertJoin(self.JOIN_CHAR))
 
 
 def camelcase(s, **kwargs):

@@ -98,6 +98,7 @@ def test_cobol_with_default_args(input, output):
         ),
         # Alternating character cases
         ("heLlo WoRld", "HE_LLO_WO_RLD"),
+        ("HelloXWorld", "HELLO_X_WORLD"),
     ],
 )
 def test_macro_with_default_args(input, output):

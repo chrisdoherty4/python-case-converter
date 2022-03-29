@@ -9,5 +9,8 @@ package:
 check:
 	$(PYTHON) -m twine check dist/*
 
+upload-test:
+	$(PYTHON) -m twine upload --repository testpypi dist/*
+
 upload:
 	$(PYTHON) -m twine upload dist/*

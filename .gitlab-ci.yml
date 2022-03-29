@@ -14,8 +14,17 @@ build:
     - make package
   artifacts:
     paths:
-      - dist
+      - dist/
     expire_in: 1 week
+
+deploy-test:
+  stage: deploy
+  image: python:3.8-buster
+  before_script:
+    - pip install twine
+  script:
+    - make check
+    - TWINE_PASSWORD=${TWINE_TEST_PASSWORD} make upload-test
 
 deploy:
   stage: deploy

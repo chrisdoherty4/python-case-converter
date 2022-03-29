@@ -14,7 +14,7 @@ build:
     - make package
   artifacts:
     paths:
-      - dist/*
+      - dist
     expire_in: 1 week
 
 deploy:

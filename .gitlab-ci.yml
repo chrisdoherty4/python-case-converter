@@ -6,16 +6,27 @@ build:
   stage: build
   image: python:3.8-alpine
   before_script:
+    - apk add make
     - pip install pytest pytest-cov build
     - pip install -e .
   script:
-    - pytest --cov-report=term --cov=caseconverter **/*_test.py
+    - make coverage
   after_script:
     - make package
   artifacts:
     paths:
-      - dist/*
+      - dist/
     expire_in: 1 week
+
+# deploy-test:
+#   stage: deploy
+#   image: python:3.8-buster
+#   before_script:
+#     - pip install twine
+#   script:
+#     - find
+#     - make check
+#     - TWINE_PASSWORD=${TWINE_TEST_PASSWORD} make upload-test
 
 deploy:
   stage: deploy

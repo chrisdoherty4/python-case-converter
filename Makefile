@@ -3,6 +3,9 @@ PYTHON := python3
 test:
 	$(PYTHON) -m pytest ./caseconverter/
 
+coverage:
+	$(PYTHON) -m pytest --cov-report=term --cov=caseconverter **/*_test.py
+
 package:
 	$(PYTHON) -m build
 

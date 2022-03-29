@@ -6,6 +6,7 @@ build:
   stage: build
   image: python:3.8-alpine
   before_script:
+    - apk add make
     - pip install pytest pytest-cov build
     - pip install -e .
   script:

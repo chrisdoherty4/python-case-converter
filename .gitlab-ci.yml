@@ -6,12 +6,12 @@ build:
   stage: build
   image: python:3.8-alpine
   before_script:
-    - pip install pytest pytest-cov
+    - pip install pytest pytest-cov build
     - pip install -e .
   script:
     - pytest --cov-report=term --cov=caseconverter **/*_test.py
   after_script:
-    - python ./setup.py sdist bdist_wheel
+    - make package
   artifacts:
     paths:
       - dist/*
@@ -27,5 +27,5 @@ deploy:
   before_script:
     - pip install twine
   script:
-    - twine check dist/*
-    - twine upload dist/*
+    - make check
+    - make upload

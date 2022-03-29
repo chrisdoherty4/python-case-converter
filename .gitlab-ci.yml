@@ -23,6 +23,7 @@ deploy-test:
   before_script:
     - pip install twine
   script:
+    - find
     - make check
     - TWINE_PASSWORD=${TWINE_TEST_PASSWORD} make upload-test
 

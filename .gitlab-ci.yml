@@ -10,7 +10,7 @@ build:
     - pip install pytest pytest-cov build
     - pip install -e .
   script:
-    - pytest --cov-report=term --cov=caseconverter **/*_test.py
+    - make coverage
   after_script:
     - make package
   artifacts:

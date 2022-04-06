@@ -321,13 +321,23 @@ class Camel(CaseConverter):
         return c.lower()
 
 
-class Pascal(Camel):
+class Pascal(CaseConverter):
     def init(self, input_buffer, output_buffer):
         output_buffer.write(input_buffer.read(1).upper())
 
     def define_boundaries(self):
-        super(Pascal, self).define_boundaries()
+        self.add_boundary_handler(OnDelimeterUppercaseNext(self.delimiters()))
+        self.add_boundary_handler(OnUpperPrecededByLowerAppendUpper())
         self.add_boundary_handler(OnUpperPrecededByUpperAppendCurrent())
+
+    def prepare_string(self, s):
+        if s.isupper():
+            return s.lower()
+
+        return s
+
+    def mutate(self, c):
+        return c.lower()
 
 
 class Snake(CaseConverter):
@@ -335,9 +345,7 @@ class Snake(CaseConverter):
     JOIN_CHAR = "_"
 
     def define_boundaries(self):
-        self.add_boundary_handler(
-            OnDelimeterLowercaseNext(self.delimiters(), self.JOIN_CHAR)
-        )
+        self.add_boundary_handler(OnDelimeterLowercaseNext(self.delimiters(), self.JOIN_CHAR))
         self.add_boundary_handler(OnUpperPrecededByLowerAppendLower(self.JOIN_CHAR))
 
     def prepare_string(self, s):
@@ -350,14 +358,37 @@ class Snake(CaseConverter):
         return c.lower()
 
 
-class Flat(Snake):
+class Flat(CaseConverter):
+    def define_boundaries(self):
+        self.add_boundary_handler(OnDelimeterLowercaseNext(self.delimiters()))
+        self.add_boundary_handler(OnUpperPrecededByLowerAppendLower())
 
-    JOIN_CHAR = ""
+    def prepare_string(self, s):
+        if s.isupper():
+            return s.lower()
+
+        return s
+
+    def mutate(self, c):
+        return c.lower()
 
 
-class Kebab(Snake):
+class Kebab(CaseConverter):
 
     JOIN_CHAR = "-"
+
+    def define_boundaries(self):
+        self.add_boundary_handler(OnDelimeterLowercaseNext(self.delimiters(), self.JOIN_CHAR))
+        self.add_boundary_handler(OnUpperPrecededByLowerAppendLower(self.JOIN_CHAR))
+
+    def prepare_string(self, s):
+        if s.isupper():
+            return s.lower()
+
+        return s
+
+    def mutate(self, c):
+        return c.lower()
 
 
 class Cobol(CaseConverter):
@@ -365,9 +396,7 @@ class Cobol(CaseConverter):
     JOIN_CHAR = "-"
 
     def define_boundaries(self):
-        self.add_boundary_handler(
-            OnDelimeterUppercaseNext(self.delimiters(), self.JOIN_CHAR)
-        )
+        self.add_boundary_handler(OnDelimeterUppercaseNext(self.delimiters(), self.JOIN_CHAR))
         self.add_boundary_handler(OnUpperPrecededByLowerAppendUpper(self.JOIN_CHAR))
 
     def convert(self):
@@ -384,13 +413,27 @@ class Cobol(CaseConverter):
         return c.upper()
 
 
-class Macro(Cobol):
+class Macro(CaseConverter):
 
     JOIN_CHAR = "_"
 
     def define_boundaries(self):
-        super(Macro, self).define_boundaries()
+        self.add_boundary_handler(OnDelimeterUppercaseNext(self.delimiters(), self.JOIN_CHAR))
+        self.add_boundary_handler(OnUpperPrecededByLowerAppendUpper(self.JOIN_CHAR))
         self.add_boundary_handler(OnUpperPrecededByUpperAppendJoin(self.JOIN_CHAR))
+
+    def convert(self):
+        if self.raw().isupper():
+            return re.sub(
+                "[{}]+".format(re.escape(self.delimiters())),
+                self.JOIN_CHAR,
+                self.raw(),
+            )
+
+        return super(Macro, self).convert()
+
+    def mutate(self, c):
+        return c.upper()
 
 
 def camelcase(s, **kwargs):

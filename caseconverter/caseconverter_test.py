@@ -1,5 +1,5 @@
 import pytest
-from .caseconverter import *
+from . import *
 
 
 @pytest.mark.parametrize(

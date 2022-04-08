@@ -1,4 +1,3 @@
-
 class BoundaryHandler(object):
     """Detect and handle boundaries in a string.
 

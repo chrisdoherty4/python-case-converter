@@ -2,7 +2,7 @@ import re
 import string
 import logging
 from io import StringIO
-from .boundaries import *
+#from .boundaries import *
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

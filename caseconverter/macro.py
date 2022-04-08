@@ -6,10 +6,16 @@ class Macro(CaseConverter):
 
     JOIN_CHAR = "_"
 
+    def __init__(self, *args, delims_only=False, **kwargs):
+        self._delims_only = delims_only
+        super(Macro, self).__init__(*args, **kwargs)
+
     def define_boundaries(self):
         self.add_boundary_handler(OnDelimeterUppercaseNext(self.delimiters(), self.JOIN_CHAR))
-        self.add_boundary_handler(OnUpperPrecededByLowerAppendUpper(self.JOIN_CHAR))
-        self.add_boundary_handler(OnUpperPrecededByUpperAppendJoin(self.JOIN_CHAR))
+        
+        if not self._delims_only:
+            self.add_boundary_handler(OnUpperPrecededByLowerAppendUpper(self.JOIN_CHAR))
+            self.add_boundary_handler(OnUpperPrecededByUpperAppendJoin(self.JOIN_CHAR))
 
     def convert(self):
         if self.raw().isupper():

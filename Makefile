@@ -17,3 +17,6 @@ upload-test:
 
 upload:
 	$(PYTHON) -m twine upload dist/*
+
+dependencies:
+	$(PYTHON) -m pip install pytest twine setuptools

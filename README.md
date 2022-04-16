@@ -13,10 +13,6 @@ from caseconverter import camelcase
 camelcase("Hello, world!") # output: helloWorld
 ```
 
-### Delimeter behavior
-
-If multiple delimeter characters are identified next to eachother they will be considered as a single delimeter. For example, `-_` contains 2 different delimeter characters and is considered a single delimeter.
-
 ## Available conversions
 
 ### `camelcase`
@@ -135,8 +131,13 @@ set of delimiters.
 camelcase("Hello,|world!", delims="|") # output: helloWorld
 ```
 
+## Behavior
 
-## Boundaries definitions
+### Delimiters
+
+If multiple delimeter characters are identified next to eachother they will be considered as a single delimeter. For example, `-_` contains 2 different delimeter characters and is considered a single delimeter.
+
+### Boundary definitions
 
 |Name|Description|
 |---|---|

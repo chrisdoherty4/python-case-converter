@@ -1,6 +1,7 @@
 import pytest
 from . import *
 
+
 @pytest.mark.parametrize(
     "input, output",
     [
@@ -38,10 +39,7 @@ def test_macro_with_default_args(input, output):
 
 @pytest.mark.parametrize(
     "input, output",
-    [
-        ("IP Address", "IP_ADDRESS"),
-        ("Hello IP Address", "HELLO_IP_ADDRESS")
-    ],
+    [("IP Address", "IP_ADDRESS"), ("Hello IP Address", "HELLO_IP_ADDRESS")],
 )
 def test_macro_with_delims_only(input, output):
     assert macrocase(input, delims_only=True) == output

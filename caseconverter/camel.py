@@ -1,5 +1,6 @@
 from .caseconverter import CaseConverter
-from .boundaries import (OnDelimeterUppercaseNext, OnUpperPrecededByLowerAppendUpper)
+from .boundaries import OnDelimeterUppercaseNext, OnUpperPrecededByLowerAppendUpper
+
 
 class Camel(CaseConverter):
     def define_boundaries(self):
@@ -20,7 +21,7 @@ def camelcase(s, **kwargs):
     """Convert a string to camel case.
 
     Example
-    
+
       Hello World => helloWorld
 
     """

@@ -31,6 +31,7 @@ class BoundaryHandler(object):
         """
         raise NotImplementedError()
 
+
 class OnDelimeterUppercaseNext(BoundaryHandler):
     def __init__(self, delimiters, join_char=""):
         self._delimiters = delimiters

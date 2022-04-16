@@ -1,5 +1,6 @@
 from .caseconverter import CaseConverter
-from .boundaries import (OnDelimeterLowercaseNext, OnUpperPrecededByLowerAppendLower)
+from .boundaries import OnDelimeterLowercaseNext, OnUpperPrecededByLowerAppendLower
+
 
 class Flat(CaseConverter):
     def define_boundaries(self):

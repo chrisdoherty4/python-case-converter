@@ -1,5 +1,10 @@
 from .caseconverter import CaseConverter
-from .boundaries import (OnDelimeterUppercaseNext, OnUpperPrecededByLowerAppendUpper, OnUpperPrecededByUpperAppendCurrent)
+from .boundaries import (
+    OnDelimeterUppercaseNext,
+    OnUpperPrecededByLowerAppendUpper,
+    OnUpperPrecededByUpperAppendCurrent,
+)
+
 
 class Pascal(CaseConverter):
     def init(self, input_buffer, output_buffer):

@@ -2,15 +2,17 @@ import re
 import string
 import logging
 from io import StringIO
-#from .boundaries import *
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
-ch.setFormatter(logging.Formatter("%(asctime)s : %(name)s : %(levelname)s : %(message)s"))
+ch.setFormatter(
+    logging.Formatter("%(asctime)s : %(name)s : %(levelname)s : %(message)s")
+)
 logger.addHandler(ch)
+
 
 class StringBuffer(StringIO):
     """StringBuffer is a wrapper around StringIO.
@@ -48,11 +50,11 @@ class CaseConverter(object):
         Delimeters are taken into consideration when defining stripable
         punctuation.
 
-        Delimeters will be reduced to single instances of a delimeter. This 
+        Delimeters will be reduced to single instances of a delimeter. This
         includes transforming `   -_-__  `  to `-`.
 
-        During initialization, the raw input string will be passed through 
-        the prepare_string() method. Child classes should override this 
+        During initialization, the raw input string will be passed through
+        the prepare_string() method. Child classes should override this
         method if they wish to perform pre-conversion checks and manipulate
         the string accordingly.
 
@@ -170,7 +172,7 @@ class CaseConverter(object):
             3. If on a boundary, execute the handler.
             4. Else apply a mutation to the character via `mutate()` and add
                the mutated character to the output buffer.
-    
+
         :return: The converted string.
         :rtype: str
         """

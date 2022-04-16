@@ -1,12 +1,15 @@
 from .caseconverter import CaseConverter
-from .boundaries import (OnDelimeterLowercaseNext, OnUpperPrecededByLowerAppendLower)
+from .boundaries import OnDelimeterLowercaseNext, OnUpperPrecededByLowerAppendLower
+
 
 class Kebab(CaseConverter):
 
     JOIN_CHAR = "-"
 
     def define_boundaries(self):
-        self.add_boundary_handler(OnDelimeterLowercaseNext(self.delimiters(), self.JOIN_CHAR))
+        self.add_boundary_handler(
+            OnDelimeterLowercaseNext(self.delimiters(), self.JOIN_CHAR)
+        )
         self.add_boundary_handler(OnUpperPrecededByLowerAppendLower(self.JOIN_CHAR))
 
     def prepare_string(self, s):

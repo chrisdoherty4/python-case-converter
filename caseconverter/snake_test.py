@@ -1,6 +1,7 @@
 import pytest
 from . import *
 
+
 @pytest.mark.parametrize(
     "input, output",
     [

@@ -6,3 +6,4 @@ from .kebab import Kebab, kebabcase
 from .macro import Macro, macrocase
 from .pascal import Pascal, pascalcase
 from .snake import Snake, snakecase
+from .title import Title, titlecase

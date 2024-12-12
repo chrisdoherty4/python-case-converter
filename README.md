@@ -104,6 +104,18 @@ snakecase("Hello, world!")
 hello_world
 ```
 
+### `titlecase`
+
+```python
+from caseconverter import titlecase
+
+titlecase("Hello, world!")
+```
+
+```text
+Hello World
+```
+
 ## Options for all conversions
 
 ### Stripping punctuation

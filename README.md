@@ -15,6 +15,19 @@ camelcase("Hello, world!") # output: helloWorld
 
 ## Available conversions
 
+### `alternatingcase`
+
+```python
+from caseconverter import alternatingcase
+
+alternatingcase("Hello, world!")
+```
+
+```text
+hElLo WoRlD
+```
+
+
 ### `camelcase`
 
 ```python

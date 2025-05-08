@@ -1,4 +1,5 @@
 from .caseconverter import CaseConverter, DELIMITERS
+from .alternating import Alternating, alternatingcase
 from .camel import Camel, camelcase
 from .cobol import Cobol, cobolcase
 from .flat import Flat, flatcase

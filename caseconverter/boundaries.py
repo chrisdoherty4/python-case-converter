@@ -99,7 +99,7 @@ class OnUpperPrecededByUpperAppendCurrent(BoundaryHandler):
         self._join_char = join_char
 
     def is_boundary(self, pc, c):
-        return pc != None and pc.isalpha() and pc.isupper() and c.isupper()
+        return pc is not None and pc.isalpha() and pc.isupper() and c.isupper()
 
     def handle(self, pc, cc, input_buffer, output_buffer):
         output_buffer.write(cc)

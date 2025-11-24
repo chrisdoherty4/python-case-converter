@@ -31,6 +31,7 @@ from . import *
         # Alternating character cases
         ("heLlo WoRld", "HeLloWoRld"),
         ("helloWORLD", "HelloWORLD"),
+        ("HELLOWorld", "HELLOWorld"),
     ],
 )
 def test_pascal_with_default_args(input, output):
